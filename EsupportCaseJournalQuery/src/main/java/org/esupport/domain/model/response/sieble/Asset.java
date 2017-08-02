@@ -1,6 +1,7 @@
-package org.esupport.domain.model.response;
+package org.esupport.domain.model.response.sieble;
 
 public class Asset {
+	
 	private String serviceTag;
 
 	private String expressServiceCode;

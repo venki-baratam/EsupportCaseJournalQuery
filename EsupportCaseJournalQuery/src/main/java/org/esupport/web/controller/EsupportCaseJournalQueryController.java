@@ -1,7 +1,7 @@
 package org.esupport.web.controller;
 
-import org.esupport.domain.model.request.BillRequest;
-import org.esupport.domain.model.response.GetCaseResponse;
+import org.esupport.domain.model.request.sieble.GetCaseRequest;
+import org.esupport.domain.model.response.sieble.GetCaseResponse;
 import org.esupport.web.repository.SiebelSessionAdapterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
@@ -18,9 +18,9 @@ public class EsupportCaseJournalQueryController {
 	private SiebelSessionAdapterRepository siebelSessionAdapterRepository;
 
 	@PostMapping("/EsupportCaseJournalQuery")
-	public GetCaseResponse create(@RequestBody BillRequest billRequest, BindingResult errors) {
+	public GetCaseResponse create(@RequestBody GetCaseRequest getCaseRequest, BindingResult errors) {
 
-		return siebelSessionAdapterRepository.getData(billRequest);
+		return siebelSessionAdapterRepository.getData(getCaseRequest);
 	}
 
 }

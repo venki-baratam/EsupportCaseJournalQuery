@@ -1,6 +1,7 @@
-package org.esupport.domain.model.request;
+package org.esupport.domain.model.response.sieble;
 
 public class Customer {
+	
 	private String id;
 
 	private String name;

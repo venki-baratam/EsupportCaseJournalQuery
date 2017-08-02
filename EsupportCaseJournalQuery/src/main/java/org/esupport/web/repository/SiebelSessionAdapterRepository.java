@@ -1,8 +1,15 @@
 package org.esupport.web.repository;
 
-import org.esupport.domain.model.request.BillRequest;
-import org.esupport.domain.model.request.GetCaseRequest;
-import org.esupport.domain.model.response.GetCaseResponse;
+import org.esupport.domain.model.request.sieble.GetCaseRequest;
+import org.esupport.domain.model.request.target.Action;
+import org.esupport.domain.model.request.target.IspCaseHistoryGetActivityInServiceRunInput;
+import org.esupport.domain.model.request.target.ListOfIspCaseHistoryGetActivityRequest;
+import org.esupport.domain.model.response.sieble.Asset;
+import org.esupport.domain.model.response.sieble.Case;
+import org.esupport.domain.model.response.sieble.CaseHeader;
+import org.esupport.domain.model.response.sieble.Customer;
+import org.esupport.domain.model.response.sieble.GetCaseResponse;
+import org.esupport.domain.model.response.tagret.IspCaseHistoryGetActivityInServiceRunOutput;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,37 +20,60 @@ public class SiebelSessionAdapterRepository {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	public GetCaseResponse getData(BillRequest billRequest) {
+	public GetCaseResponse getData(GetCaseRequest getCaseRequest) {
 
-		GetCaseRequest targetRequest = null;
+		IspCaseHistoryGetActivityInServiceRunInput targetInput = new IspCaseHistoryGetActivityInServiceRunInput();
 
-		if (validate(billRequest))
-			targetRequest = mapBillRequestToTagetRequest(billRequest);
+		targetInput = mapGetCaseRequestToTagetRequest(getCaseRequest);
 
-		String url = "";
-		
-		url = "http://www.mocky.io/v2/597c376a0f0000ba02f4dbc7";
-		
-		//Remove above url assignment and un-comment below code to cal target service.
-		
-		// url = "http://svc4-osb-sit.us.dell.com/3_7/SiebelSessionAdapter_SIT4";
-		// return restTemplate.postForObject(url, targetRequest,
-		// GetCaseResponse.class);
+		String url = "http://localhost:9090/SiebelSessionAdapter/SIT4";
 
-		return restTemplate.getForObject(url, GetCaseResponse.class);
+		IspCaseHistoryGetActivityInServiceRunOutput outPut = restTemplate.postForObject(url, targetInput,
+				IspCaseHistoryGetActivityInServiceRunOutput.class);
+
+		return mapTargetOutputToGetCaseResponse(outPut);
 	}
 
-	private GetCaseRequest mapBillRequestToTagetRequest(BillRequest billRequest) {
-		GetCaseRequest targetRequest = new GetCaseRequest();
-		targetRequest.setCaseHeader(billRequest.getCaseObj().getCaseHeader());
-		return targetRequest;
+	private GetCaseResponse mapTargetOutputToGetCaseResponse(IspCaseHistoryGetActivityInServiceRunOutput outPut) {
+
+		GetCaseResponse getCaseResponse = new GetCaseResponse();
+		getCaseResponse.setCaseObj(new Case());
+		getCaseResponse.getCaseObj().setCaseHeader(new CaseHeader());
+		getCaseResponse.getCaseObj().getCaseHeader().setAsset(new Asset());
+		getCaseResponse.getCaseObj().getCaseHeader().setCustomer(new Customer());
+		getCaseResponse.getCaseObj().getCaseHeader()
+				.setId(outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getSrNumber());
+		getCaseResponse.getCaseObj().getCaseHeader()
+				.setTitle(outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getSrTitle());
+		getCaseResponse.getCaseObj().getCaseHeader().setDataSource("DELTA");
+		getCaseResponse.getCaseObj().getCaseHeader().getAsset()
+				.setServiceTag(outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getServiceTag());
+		getCaseResponse.getCaseObj().getCaseHeader().getAsset().setExpressServiceCode(
+				outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getExpressServiceCode());
+		getCaseResponse.getCaseObj().getCaseHeader().getCustomer()
+				.setId(outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getCustomerNumber());
+		getCaseResponse.getCaseObj().getCaseHeader().getCustomer()
+				.setName(outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getCustomerLastName());
+		getCaseResponse.getCaseObj().getCaseHeader().getCustomer().setPrimaryPhone(
+				outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getCustomerPriConPhn());
+		getCaseResponse.getCaseObj().getCaseHeader().getCustomer()
+				.setQtcId(outPut.getListOfIspCaseHistoryGetActivityResponse().getAction().getiSPQTCCutomerNumber());
+
+		return getCaseResponse;
 	}
 
-	private boolean validate(BillRequest billRequest) {
+	private IspCaseHistoryGetActivityInServiceRunInput mapGetCaseRequestToTagetRequest(GetCaseRequest getCaseRequest) {
 
-		// Implement this API
-		// Write all ur validations in this api
+		IspCaseHistoryGetActivityInServiceRunInput targetInput = new IspCaseHistoryGetActivityInServiceRunInput();
+		targetInput.setListOfIspCaseHistoryGetActivityRequest(new ListOfIspCaseHistoryGetActivityRequest());
+		targetInput.getListOfIspCaseHistoryGetActivityRequest().setAction(new Action());
+		targetInput.getListOfIspCaseHistoryGetActivityRequest().getAction().setId(
+				getCaseRequest.getCaseHeader().getInteractions().getInteraction().getInteractionHeader().getId());
 
-		return true;
+		targetInput.getListOfIspCaseHistoryGetActivityRequest().getAction()
+				.setSrNumber(getCaseRequest.getCaseHeader().getId());
+
+		return targetInput;
 	}
+
 }

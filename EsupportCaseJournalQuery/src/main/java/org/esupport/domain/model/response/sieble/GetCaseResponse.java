@@ -1,7 +1,7 @@
-package org.esupport.domain.model.request;
+package org.esupport.domain.model.response.sieble;
 
-public class BillRequest {
-
+public class GetCaseResponse {
+	
 	private Case caseObj;
 
 	public Case getCaseObj() {
